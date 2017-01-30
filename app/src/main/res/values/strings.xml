@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">quizdroid</string>
+    <string name="math_title">Math</string>
+    <string name="physics_title">Physics</string>
+    <string name="marvel_title">Marvel</string>
+    <string name="filler_text">lorem ipsum stuff overview summary of this text blah blah blah blah words
+    lots of words tons of words oh so many words in the beginning there was only darkness and then god said
+    let there be dinosaurs and such there were dinosaurs now we have trump as our president and its all because
+    ice cream and pizza was originally made with milk so people who are dating people who are lactose intolerant
+    can never truly enjoy the magic of an icecream pizza date but im not salty at all i swear Thomas why are you
+    still reading this im literally just ranting ok this paragraph seems to be long enough im done now this quiz is dope take it</string>
+    <string name="quest_num"> There are 5 questions</string>
+    <string name="question">Is this a real question?</string>
+    <string name="real_answer">yes</string>
+    <string name="fake_answer">no</string>
+    <string name="begin">Begin</string>
+    <string name="summary">Summary</string>
+    <string name="submit">submit</string>
+    <string name="question_1">Question 1</string>
+    <string name="question_2">Question 2</string>
+    <string name="question_3">Question 3</string>
+    <string name="question_4">Question 4</string>
+    <string name="question_5">Question 5</string>
+    <string name="physics">Physics</string>
+</resources>
