@@ -52,11 +52,7 @@ public class receiver extends WakefulBroadcastReceiver {
         service.putExtra("url", url);
         Toast.makeText(context, "Attempting a download from " + url, Toast.LENGTH_SHORT).show();
         context.startService(service);
-        if(QuizApp.downloadsuccess) {
-            Toast.makeText(context, "Download complete", Toast.LENGTH_LONG).show();
-        } else {
-            MainActivity.exit();
-        }
+
         QuizApp.fillRepo();
     }
 
@@ -70,7 +66,7 @@ public class receiver extends WakefulBroadcastReceiver {
         Intent intent = new Intent(context, receiver.class);
         alarmIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
 
-        manager.setRepeating(AlarmManager.RTC_WAKEUP, interval * 60 * 1000, interval * 60 * 1000, alarmIntent);
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, 0, interval * 60 * 1000, alarmIntent);
 
     }
 

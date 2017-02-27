@@ -2,7 +2,10 @@ package edu.washington.kpham97.quizdroid;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.os.Handler;
+import android.telephony.SmsManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -27,6 +30,8 @@ import java.nio.charset.Charset;
 
 public class downloadservice extends IntentService {
 
+
+    Handler mHandler;
     /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
 
@@ -72,5 +77,22 @@ public class downloadservice extends IntentService {
             } catch (Exception e) {
             }
         }
+
+        if(QuizApp.downloadsuccess) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getApplicationContext(), "Download complete", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            MainActivity.exitApp();
+        }
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mHandler = new Handler();
     }
 }

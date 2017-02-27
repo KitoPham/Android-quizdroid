@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity{
     private static RecyclerView.Adapter mAdapter;
     private static RecyclerView.LayoutManager mLayoutManager;
     receiver download = new receiver();
-    private static Activity activity;
+    static Activity activity;
 
 
 
@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity{
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
         download.setDownload(this);
+        connectivity();
         change("start");
 
     }
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity{
                 return super.onOptionsItemSelected(item);
         }
     }
-    public static void exit(){
+    public static void exitApp(){
         new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
                 .setMessage("Download Unsuccessful: Would you like to quit and try again later?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -102,7 +103,9 @@ public class MainActivity extends AppCompatActivity{
 
     public void connectivity(){
         boolean airplanemode = isAirplaneModeOn(this);
-        if(!airplanemode){
+        ConnectivityManager connect = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo network = connect.getActiveNetworkInfo();
+        if(airplanemode){
             new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
                     .setMessage("Airplane mode is on. Would you like to turn it off?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -114,12 +117,7 @@ public class MainActivity extends AppCompatActivity{
                     .setNegativeButton("No", null)
                     .show();
 
-        }
-
-        ConnectivityManager connect = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo network = connect.getActiveNetworkInfo();
-
-        if(network == null || network.isConnectedOrConnecting()){
+        } else if (network == null || !network.isConnectedOrConnecting()){
             new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
                     .setMessage("Error: No Network")
                     .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -135,6 +133,10 @@ public class MainActivity extends AppCompatActivity{
 
     }
 
+    public void onResume(){
+        super.onResume();
+        connectivity();
+    }
     @SuppressWarnings("deprecation")
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public static boolean isAirplaneModeOn(Context context) {
