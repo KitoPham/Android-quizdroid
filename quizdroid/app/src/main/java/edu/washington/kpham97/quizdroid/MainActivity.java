@@ -1,50 +1,152 @@
 package edu.washington.kpham97.quizdroid;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Build;
+import android.provider.Settings;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ActionBar;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;import edu.washington.kpham97.branch2.R;import edu.washington.kpham97.quizdroid.R;import edu.washington.kpham97.quizdroid.marvOverview;import edu.washington.kpham97.quizdroid.mathOverview;import edu.washington.kpham97.quizdroid.phyOverview;import edu.washington.kpham97.quizdroid.sameOverview;
+import android.support.v7.view.ContextThemeWrapper;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
-    private String[] topics = new String[]{
-            "Math", "Physics", "Marvel Super Heroes", "Same"
+    private static RecyclerView mRecyclerView;
+    private static RecyclerView.Adapter mAdapter;
+    private static RecyclerView.LayoutManager mLayoutManager;
+    receiver download = new receiver();
+    static Activity activity;
 
-    };
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final ListView listView = (ListView)findViewById(R.id.listView);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_list_item_1,
-                android.R.id.text1,
-                topics);
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.i("Listview", "position:" + position);
-                Intent i = new Intent();
-                if (position == 0){
-                    i.setClass(getApplicationContext(),mathOverview.class);
-                } else if (position == 1) {
-                    i.setClass(getApplicationContext(),phyOverview.class);
-                } else if (position == 2) {
-                    i.setClass(getApplicationContext(),marvOverview.class);
-                } else if (position == 3) {
-                    i.setClass(getApplicationContext(),sameOverview.class);
-                }
+        activity = this;
+        mRecyclerView = (RecyclerView) findViewById(R.id.recycleView);
+        mRecyclerView.setHasFixedSize(true);
 
-                startActivity(i);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        download.setDownload(this);
+        connectivity();
+        change("start");
 
-            }
-        });
     }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_settings:
+                getFragmentManager().beginTransaction()
+                        .replace(android.R.id.content, new settingsFragment())
+                        .addToBackStack("Back")
+                        .commit();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+    public static void exitApp(){
+        new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
+                .setMessage("Download Unsuccessful: Would you like to quit and try again later?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        //Stop the activity
+                        activity.finish();
+                        System.exit(0);
+                    }
+
+                })
+                .setNegativeButton("No", null)
+                .show();
+    }
+    public static void change(String string){
+        if (string.equals("start")){
+            mAdapter = new listAdaptor();
+            mRecyclerView.setAdapter(mAdapter);
+        } else if (string.equals("overview")){
+            mAdapter = new overviewAdaptor();
+            mRecyclerView.setAdapter(mAdapter);
+        } else if (string.equals("question")) {
+            mAdapter = new questionAdaptor();
+            mRecyclerView.setAdapter(mAdapter);
+        } else if (string.equals("answer")){
+            mAdapter = new answerAdaptor();
+            mRecyclerView.setAdapter(mAdapter);
+        }
+    }
+
+    public void connectivity(){
+        boolean airplanemode = isAirplaneModeOn(this);
+        ConnectivityManager connect = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo network = connect.getActiveNetworkInfo();
+        if(airplanemode){
+            new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
+                    .setMessage("Airplane mode is on. Would you like to turn it off?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            startActivity(new Intent(Settings.ACTION_AIRPLANE_MODE_SETTINGS));
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
+        } else if (network == null || !network.isConnectedOrConnecting()){
+            new AlertDialog.Builder(new ContextThemeWrapper(activity, R.style.myDialog))
+                    .setMessage("Error: No Network")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            activity.finish();
+                            System.exit(0);
+                        }
+                    })
+                    .show();
+        }
+
+
+    }
+
+    public void onResume(){
+        super.onResume();
+        connectivity();
+    }
+    @SuppressWarnings("deprecation")
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+    public static boolean isAirplaneModeOn(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            return Settings.System.getInt(context.getContentResolver(),
+                    Settings.System.AIRPLANE_MODE_ON, 0) != 0;
+        } else {
+            return Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.AIRPLANE_MODE_ON, 0) != 0;
+        }
+    }
+
 }
